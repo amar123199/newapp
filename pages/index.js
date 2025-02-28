@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion'; // Importing framer-mot
 import BottomNavigationBar from '../components/BottomNavigationBar';
 import FloatingActionButton from '../components/FloatingActionButton';
 import AddActionButton from '../components/AddActionButton';
+import ResetActionButton from '../components/ResetActionButton';
 import StatCard from '../components/StatCard'; // Import the StatCard component
 
 import { Drawer, SwipeableDrawer, Typography } from '@mui/material';
@@ -65,7 +66,7 @@ export default function Home() {
     const filteredData = data.filter(item => isCreatedOnDate(item.createdAt, currentDate));
 
     // Sort the filtered data by patientNo in ascending order
-    const sortedData = filteredData.sort((a, b) => a.patientNo - b.patientNo);
+    const sortedData = filteredData.sort((a, b) => b.patientNo - a.patientNo);
 
     setItems(sortedData);
 
@@ -132,6 +133,7 @@ export default function Home() {
 
   // FAB click handler with an alert
   const handleFabClick = () => {
+    toggleSearchDrawer();
     //alert('Floating Action Button clicked!');
     setOpen(!open); // Open the drawer
     setTimeout(() => {
@@ -160,6 +162,7 @@ export default function Home() {
   const toggleSearchDrawer = () => {
     setOpen(false);
     setSearch(false);
+    setSearchName(''); // Clear the search input when closing
     fetchData();
   };
 
@@ -186,10 +189,22 @@ export default function Home() {
 
       console.log("Document written with ID: ", docRef.id);
 
-      // Update local state to reflect new patient
-      setItems([...items, { id: docRef.id, name, illness, medicine, patientNo: patientNo }]);
-      setPatientNo(patientNo + 1);
+      // Update local state to reflect new patient, converting the createdAt to a valid Date object
+    const newPatient = {
+      id: docRef.id,
+      name: capitalizedName,
+      illness,
+      medicine,
+      patientNo,
+      createdAt: new Date() // Ensure it's converted to a JavaScript Date object
+    };
 
+      // Update local state to reflect new patient
+      setItems(prevItems => [...prevItems, newPatient]); // Update state with new patient
+      setPatientNo(patientNo + 1);
+      
+      // After adding, trigger a fresh data fetch to update the UI
+    fetchData();
 
       // Reset input fields
       setName("");
@@ -251,8 +266,18 @@ export default function Home() {
         relativeTime: formatDate(createdAt),
       };
     });
-    setItems(results);
+
+   // Sort the results in descending order based on the createdAt field (latest first)
+  const sortedResults = results.sort((a, b) => b.createdAt - a.createdAt);
+
+    setItems(sortedResults);
     //setSearchResults(results); // Update search results state
+  };
+
+  const resetToToday = () => {
+    const today = new Date();
+    setCurrentDate(today); // Reset to today's date
+    fetchData(); // Fetch data based on today's date
   };
 
   return (
@@ -455,6 +480,8 @@ export default function Home() {
 
 
       {new Date().toDateString() === currentDate.toDateString() && <AddActionButton onClick={handleFabClick} />}
+      {new Date().toDateString() !== currentDate.toDateString() && <ResetActionButton onClick={resetToToday} />}
+     
 
       {/* <FloatingActionButton onClick={handleSearchClick} /> */}
 
