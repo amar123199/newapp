@@ -33,6 +33,11 @@ import 'swiper/css';
 import { collection, getDocs, addDoc, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Import Firestore config
 
+
+
+
+
+
 export default function Home() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [swipeDirection, setSwipeDirection] = useState(0); // Track swipe direction
@@ -52,6 +57,12 @@ export default function Home() {
 
   const [items, setItems] = useState([]);
   const [patientNo, setPatientNo] = useState(0); // Track the patient number
+
+  const [speechTranscript, setSpeechTranscript] = useState(''); // To store the transcript
+  const [isListening, setIsListening] = useState(false); // To track the listening state
+
+  // Initialize SpeechRecognition
+  const recognition = useRef(null);
 
   useEffect(() => {
 
@@ -169,14 +180,14 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Capitalize the first letter of the name
-  const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+    const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
 
-  console.log({ capitalizedName, illness, medicine });
+    console.log({ capitalizedName, illness, medicine });
 
-  if (!capitalizedName || !illness || !medicine) {
-    alert("Please fill all fields before saving.");
-    return;
-  }
+    if (!capitalizedName || !illness || !medicine) {
+      alert("Please fill all fields before saving.");
+      return;
+    }
 
     try {
       const docRef = await addDoc(collection(db, "patients"), {
@@ -190,21 +201,21 @@ export default function Home() {
       console.log("Document written with ID: ", docRef.id);
 
       // Update local state to reflect new patient, converting the createdAt to a valid Date object
-    const newPatient = {
-      id: docRef.id,
-      name: capitalizedName,
-      illness,
-      medicine,
-      patientNo,
-      createdAt: new Date() // Ensure it's converted to a JavaScript Date object
-    };
+      const newPatient = {
+        id: docRef.id,
+        name: capitalizedName,
+        illness,
+        medicine,
+        patientNo,
+        createdAt: new Date() // Ensure it's converted to a JavaScript Date object
+      };
 
       // Update local state to reflect new patient
       setItems(prevItems => [...prevItems, newPatient]); // Update state with new patient
       setPatientNo(patientNo + 1);
-      
+
       // After adding, trigger a fresh data fetch to update the UI
-    fetchData();
+      fetchData();
 
       // Reset input fields
       setName("");
@@ -267,8 +278,8 @@ export default function Home() {
       };
     });
 
-   // Sort the results in descending order based on the createdAt field (latest first)
-  const sortedResults = results.sort((a, b) => b.createdAt - a.createdAt);
+    // Sort the results in descending order based on the createdAt field (latest first)
+    const sortedResults = results.sort((a, b) => b.createdAt - a.createdAt);
 
     setItems(sortedResults);
     //setSearchResults(results); // Update search results state
@@ -279,6 +290,61 @@ export default function Home() {
     setCurrentDate(today); // Reset to today's date
     fetchData(); // Fetch data based on today's date
   };
+
+  useEffect(() => {
+    // Initialize SpeechRecognition on component mount
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+      recognition.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.current.lang = 'en-US'; // Set the language
+      recognition.current.interimResults = true; // Get real-time results
+      recognition.current.maxAlternatives = 1; // Get only the best result
+
+      recognition.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log('Transcript:', transcript); // Log the transcript to the console
+        setSpeechTranscript(transcript); // Update the speech transcript in the state
+        setName(transcript); // Set the transcript as the name input value
+      };
+
+      recognition.current.onend = () => {
+        setIsListening(false); // Set listening state to false when recognition ends
+        console.log('Speech recognition stopped');
+      };
+
+      recognition.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+      };
+    } else {
+      console.log('SpeechRecognition is not supported in this browser.');
+    }
+
+    // Cleanup on component unmount
+    return () => {
+      if (recognition.current) {
+        recognition.current.onresult = null;
+        recognition.current.onend = null;
+        recognition.current.onerror = null;
+      }
+    };
+  }, []);
+
+  const handleStartListening = () => {
+    if (recognition.current) {
+      recognition.current.start();
+      setIsListening(true); // Set listening state to true
+      console.log('Speech recognition started');
+    }
+  };
+
+  const handleStopListening = () => {
+    if (recognition.current) {
+      recognition.current.stop(); // Stop the recognition
+      setIsListening(false); // Set listening state to false
+      console.log('Speech recognition stopped');
+    }
+  };
+
+
 
   return (
     <>
@@ -386,7 +452,13 @@ export default function Home() {
                 onChange={(e) => setName(e.target.value)}  // Update state on change
               />
             </Field>
-
+            <Button
+            onMouseDown={handleStartListening}
+              onMouseUp={handleStopListening}
+              onTouchStart={handleStartListening}  // Handle touch devices
+              onTouchEnd={handleStopListening}    // Handle touch devices
+              disabled={isListening} >M</Button>
+           
             <Field label="Illness" required>
               <Input
                 variant="subtle"
@@ -481,7 +553,7 @@ export default function Home() {
 
       {new Date().toDateString() === currentDate.toDateString() && <AddActionButton onClick={handleFabClick} />}
       {new Date().toDateString() !== currentDate.toDateString() && <ResetActionButton onClick={resetToToday} />}
-     
+
 
       {/* <FloatingActionButton onClick={handleSearchClick} /> */}
 
