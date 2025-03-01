@@ -2,7 +2,7 @@
 import { useState } from 'react';
 // import firebase from '../firebaseConfig';
 
-// import { Button, Input, Box, Separator, Text, VStack } from '@chakra-ui/react';
+import { Button, Input, Box, Separator, Text, VStack, Flex, Stack, Heading, Field, Textarea, ButtonGroup, Group, InputAddon } from '@chakra-ui/react';
 // import { Field } from "../components/ui/field"
 
 
@@ -40,11 +40,34 @@ const AuthPage = () => {
   //   setLoading(false);
   // };
 
+  // FAB click handler with an alert
+  const handleLogin = () => {
+
+  };
+
   return (
     <div>
-    
-   
-   
+
+      <Flex direction="column" size="2xl">
+        <Heading>Login</Heading>
+
+        <Stack gap="10">
+          <Group attached>
+            <InputAddon>+91</InputAddon>
+            <Input placeholder="Phone number..." />
+          </Group>
+
+          <Group attached>
+            <Input placeholder="Placeholder" />
+            <InputAddon>.com</InputAddon>
+          </Group>
+        </Stack>
+        <Button>this is button</Button>
+      </Flex>
+
+
+
+
     </div>
   );
 };
