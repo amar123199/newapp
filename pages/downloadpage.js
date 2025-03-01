@@ -119,8 +119,34 @@ const downloadpage = () => {
     }
   }, [entries]); // Trigger handleDownload when entries change
 
+  // Change URL logic to append a slash
+  // Redirect based on environment
+  const changeURL = () => {
+    let newURL = '';
+    
+    if (process.env.NODE_ENV === 'development') {
+      // In development mode, redirect to localhost:3000/assistant
+      newURL = 'http://localhost:3000/assistant';
+    } else if (process.env.NODE_ENV === 'production') {
+      // In production, redirect to the production URL
+      newURL = 'https://newappdoctor.netlify.app/assistant';  // Replace with your actual production URL
+    }
+    
+    // Perform the redirect
+    window.location.href = newURL;
+  };
+
   return (
     <div>
+
+      {/* Center-aligned title and button */}
+      <Flex direction="column" align="center" justify="center" p={4}>
+        <Heading size="xl" mb={4} textAlign="center">
+          Assistant App
+        </Heading>
+        <Button size="xl" colorPalette="teal" onClick={changeURL}>Assistant App</Button>
+      </Flex>
+
       {/* Title */}
       <Box p={4} fontWeight="semibold" letterSpacing="tight">
         <Heading size="xl" mb={0} textAlign="left">

@@ -358,7 +358,7 @@ export default function Assistant() {
                 <Table.Root size="md" stickyHeader marginBottom="120px">
                     <Table.Header>
                         <Table.Row bg="bg.subtle">
-                            <Table.ColumnHeader>No.</Table.ColumnHeader>
+                            <Table.ColumnHeader textAlign="center">No.</Table.ColumnHeader>
                             <Table.ColumnHeader>Name</Table.ColumnHeader>
                             {search && (
                                 <>
