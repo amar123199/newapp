@@ -453,10 +453,8 @@ export default function Home() {
               />
             </Field>
             <Button
-            onMouseDown={handleStartListening}
-              onMouseUp={handleStopListening}
-              onTouchStart={handleStartListening}  // Handle touch devices
-              onTouchEnd={handleStopListening}    // Handle touch devices
+            onClick={handleStartListening}
+            
               disabled={isListening} >M</Button>
            
             <Field label="Illness" required>
