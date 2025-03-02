@@ -60,7 +60,7 @@ export default function Home() {
 
   const [speechTranscript, setSpeechTranscript] = useState(''); // To store the transcript
   const [isListening, setIsListening] = useState(false); // To track the listening state
-
+  const [activeField, setActiveField] = useState(''); // Track active input
   // Initialize SpeechRecognition
   const recognition = useRef(null);
 
@@ -302,8 +302,7 @@ export default function Home() {
       recognition.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
         console.log('Transcript:', transcript); // Log the transcript to the console
-        setSpeechTranscript(transcript); // Update the speech transcript in the state
-        setName(transcript); // Set the transcript as the name input value
+        setSpeechTranscript(transcript); // Update the speech transcript in the state   
       };
 
       recognition.current.onend = () => {
@@ -328,11 +327,39 @@ export default function Home() {
     };
   }, []);
 
-  const handleStartListening = () => {
+  useEffect(()=>{
+   console.log(speechTranscript+"working")
+   if(activeField==="name") setName(speechTranscript);
+   if(activeField=="illness") setIllness(speechTranscript);
+   if(activeField=="medicine") setMedicine(speechTranscript);
+  },[speechTranscript])
+
+  const handleStartListeningName = () => {
     if (recognition.current) {
       recognition.current.start();
       setIsListening(true); // Set listening state to true
+      setActiveField("name");
       console.log('Speech recognition started');
+      
+    }
+  };
+  const handleStartListeningIllness = () => {
+    if (recognition.current) {
+      recognition.current.start();
+      setIsListening(true); // Set listening state to true
+      setActiveField("illness")
+      console.log('Speech recognition started illness');
+
+    }
+  };
+
+  const handleStartListeningMedicine = () => {
+    if (recognition.current) {
+      recognition.current.start();
+      setIsListening(true); // Set listening state to true
+      setActiveField("medicine")
+      console.log('Speech recognition started');
+
     }
   };
 
@@ -343,7 +370,6 @@ export default function Home() {
       console.log('Speech recognition stopped');
     }
   };
-
 
 
   return (
@@ -444,7 +470,6 @@ export default function Home() {
 
             <Field label="Name" required>
               <Input
-                ref={nameInputRef}
                 variant="subtle"
                 size="lg"
                 placeholder="Enter Name"
@@ -453,9 +478,9 @@ export default function Home() {
               />
             </Field>
             <Button
-            onClick={handleStartListening}
+            onClick={handleStartListeningName}
             
-              disabled={isListening} >M</Button>
+              disabled={isListening} >Name</Button>
            
             <Field label="Illness" required>
               <Input
@@ -466,6 +491,10 @@ export default function Home() {
                 onChange={(e) => setIllness(e.target.value)}  // Update state on change
               />
             </Field>
+            <Button
+            onClick={handleStartListeningIllness}
+            
+              disabled={isListening} >Illness</Button>
 
             <Field label="Medicine / Remarks" required>
               <Textarea
@@ -476,6 +505,10 @@ export default function Home() {
                 onChange={(e) => setMedicine(e.target.value)}  // Update state on change
               />
             </Field>
+            <Button
+            onClick={handleStartListeningMedicine}
+            
+              disabled={isListening} >Medicine</Button>
             <Separator />
 
             <Stack direction="row" justify="space-between" align="center">
