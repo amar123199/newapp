@@ -136,6 +136,21 @@ const downloadpage = () => {
     window.location.href = newURL;
   };
 
+  const CanvasURL = () => {
+    let newURL = '';
+    
+    if (process.env.NODE_ENV === 'development') {
+      // In development mode, redirect to localhost:3000/assistant
+      newURL = 'http://localhost:3000/canvas';
+    } else if (process.env.NODE_ENV === 'production') {
+      // In production, redirect to the production URL
+      newURL = 'https://newappdoctor.netlify.app/canvas';  // Replace with your actual production URL
+    }
+    
+    // Perform the redirect
+    window.location.href = newURL;
+  };
+
   return (
     <div>
 
@@ -146,6 +161,15 @@ const downloadpage = () => {
         </Heading>
         <Button size="xl" colorPalette="teal" onClick={changeURL}>Assistant App</Button>
       </Flex>
+
+{/* Center-aligned title and button */}
+<Flex direction="column" align="center" justify="center" p={4}>
+        <Heading size="xl" mb={4} textAlign="center">
+          Recipt Wrting
+        </Heading>
+        <Button size="xl" colorPalette="teal" onClick={CanvasURL}>Recipt Wrting</Button>
+      </Flex>
+
 
       {/* Title */}
       <Box p={4} fontWeight="semibold" letterSpacing="tight">

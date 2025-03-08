@@ -33,7 +33,7 @@ import 'swiper/css';
 import { collection, getDocs, addDoc, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Import Firestore config
 
-
+import Fuse from 'fuse.js';
 
 
 
@@ -327,12 +327,19 @@ export default function Home() {
     };
   }, []);
 
-  useEffect(()=>{
-   console.log(speechTranscript+"working")
-   if(activeField==="name") setName(speechTranscript);
-   if(activeField=="illness") setIllness(speechTranscript);
-   if(activeField=="medicine") setMedicine(speechTranscript);
-  },[speechTranscript])
+  useEffect(() => {
+    console.log(speechTranscript + "working")
+    if (activeField === "name") {
+      const matchedName = matchSpeechInput(speechTranscript);
+      if (matchedName) {
+        setName(matchedName); // Set the matched name
+      } else {
+        setName(speechTranscript); // Fallback to the original transcript
+      }
+    };
+    if (activeField == "illness") setIllness(speechTranscript);
+    if (activeField == "medicine") setMedicine(speechTranscript);
+  }, [speechTranscript])
 
   const handleStartListeningName = () => {
     if (recognition.current) {
@@ -340,7 +347,7 @@ export default function Home() {
       setIsListening(true); // Set listening state to true
       setActiveField("name");
       console.log('Speech recognition started');
-      
+
     }
   };
   const handleStartListeningIllness = () => {
@@ -370,6 +377,27 @@ export default function Home() {
       console.log('Speech recognition stopped');
     }
   };
+
+  const fuse = new Fuse(nameList, {
+    includeScore: true,  // To include the matching score
+    threshold: 0.3,      // Set threshold for match confidence (lower is stricter)
+    keys: ['name']       // Define the key to search within
+  });
+
+  // Example function to match speech input with the list of names
+  const matchSpeechInput = (speechInput) => {
+    const result = fuse.search(speechInput);  // Get match results
+    if (result.length > 0) {
+      const closestMatch = result[0].item;
+      console.log("Closest match:", closestMatch);
+      return closestMatch;
+    } else {
+      console.log("No close match found");
+      return null;
+    }
+  };
+
+
 
 
   return (
@@ -478,10 +506,10 @@ export default function Home() {
               />
             </Field>
             <Button
-            onClick={handleStartListeningName}
-            
+              onClick={handleStartListeningName}
+
               disabled={isListening} >Name</Button>
-           
+
             <Field label="Illness" required>
               <Input
                 variant="subtle"
@@ -492,8 +520,8 @@ export default function Home() {
               />
             </Field>
             <Button
-            onClick={handleStartListeningIllness}
-            
+              onClick={handleStartListeningIllness}
+
               disabled={isListening} >Illness</Button>
 
             <Field label="Medicine / Remarks" required>
@@ -506,8 +534,8 @@ export default function Home() {
               />
             </Field>
             <Button
-            onClick={handleStartListeningMedicine}
-            
+              onClick={handleStartListeningMedicine}
+
               disabled={isListening} >Medicine</Button>
             <Separator />
 
@@ -592,3 +620,105 @@ export default function Home() {
   );
 }
 
+const nameList = ["Abhijit",
+  "Parminder",
+  "Pardeep",
+  "Ravi",
+  "Baldev",
+  "Rupinder",
+  "Mukesh",
+  "Meenu",
+  "Aashu",
+  "Sanjay",
+  "Armaan",
+  "Jagjit",
+  "Ritik",
+  "Renu",
+  "Ishmeet",
+  "Navjot",
+  "Anmol",
+  "Navdeep",
+  "Dilpreet",
+  "Neeraj",
+  "Kamajit",
+  "Gurmukh",
+  "Jagdeep",
+  "Bhagwant",
+  "Simran",
+  "Harpreet",
+  "Manpreet",
+  "Deepak",
+  "Poonam",
+  "Sonia",
+  "Gurpreet",
+  "Aman",
+  "Karan",
+  "Amandeep",
+  "Sukhvir",
+  "Manish",
+  "Nidhi",
+  "Priya",
+  "Gurvinder",
+  "Harsimran",
+  "Paramjit",
+  "Deepinder",
+  "Rajinder",
+  "Rakesh",
+  "Charan",
+  "Sandeep",
+  "Inderjit",
+  "Sukhjeet",
+  "Pradeep",
+  "Kanwal",
+  "Rajeev",
+  "Bhupinder",
+  "Kuldeep",
+  "Jaspreet",
+  "Gagandeep",
+  "Balwinder",
+  "Sahil",
+  "Pritam",
+  "Ashok",
+  "Charandeep",
+  "Kanwaljeet",
+  "Vikas",
+  "Jaswinder",
+  "Sunny",
+  "Harvinder",
+  "Shubham",
+  "Vaneet",
+  "Kamal",
+  "Kiran",
+  "Shubneet",
+  "Iqbal",
+  "Parveen",
+  "Vikram",
+  "Rajpal",
+  "Kamlesh",
+  "Rohit",
+  "Ashwin",
+  "Sandeep",
+  "Nitin",
+  "Lakhwinder",
+  "Balvir",
+  "Amanpreet",
+  "Arvind",
+  "Jatinder",
+  "Deepak",
+  "Neetu",
+  "Kanchan",
+  "Jasjit",
+  "Parminderjeet",
+  "Rachna",
+  "Veerpal",
+  "Rajwinder",
+  "Narinder",
+  "Ravinder",
+  "Harjit",
+  "Gurminder",
+  "Aashiyana",
+  "Himmat",
+  "Satnam",
+  "Harvinderjeet",
+  'Illness','Puo','Pain','Der','Poo','Cough','Wonds','Deri','Nousea','Fever',
+'Medicine', 'Afst','Afst mr', 'Adl','Afsr','Syp','Inj emset','Anx',];
